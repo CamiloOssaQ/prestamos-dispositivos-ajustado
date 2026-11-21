@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import estado, dispositivo, boton_post %}
+{% block titulo %}Mis préstamos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Mis préstamos</h1>
+  <a class="btn btn--primario" href="{{ url_for('nuevo_prestamo') }}">+ Solicitar préstamo</a>
+</div>
+
+<section class="tarjeta">
+  {% if prestamos %}
+  <div class="tabla-scroll">
+    <table class="tabla">
+      <thead><tr><th>#</th><th>Dispositivo</th><th>Recogida</th><th>Entrega límite</th><th>Motivo</th><th>Estado</th><th>Observación</th><th></th></tr></thead>
+      <tbody>
+      {% for p in prestamos %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ dispositivo(p) }}</td>
+          <td>{{ p.fecha_inicio|fecha }}</td>
+          <td>{{ p.fecha_fin|fecha }}</td>
+          <td class="motivo">{{ p.motivo }}</td>
+          <td>{{ estado(p) }}</td>
+          <td><small>{{ p.observacion or '—' }}</small></td>
+          <td>
+            {% if p.estado in ('pendiente', 'aprobado') and p.fecha_inicio >= hoy %}
+              {{ boton_post(url_for('cancelar_prestamo', prestamo_id=p.id), 'Cancelar', 'btn--sm btn--borde', confirmar='¿Cancelar este préstamo?') }}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="vacio">Aún no has hecho solicitudes de préstamo.</p>
+  {% endif %}
+</section>
+{% endblock %}

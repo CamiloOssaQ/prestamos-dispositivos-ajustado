@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Dispositivos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Dispositivos</h1>
+    <p class="tenue">Inventario disponible y fechas ya reservadas.</p>
+  </div>
+</div>
+
+<div class="catalogo">
+  {% for d in dispositivos %}
+  <article class="tarjeta equipo">
+    <div class="equipo__cabecera">
+      <span class="equipo__tipo">{{ d.tipo }}</span>
+      <span class="estado {{ 'estado--en-curso' if d.ocupado_hoy else 'estado--aprobado' }}">{{ 'Prestado hoy' if d.ocupado_hoy else 'Disponible hoy' }}</span>
+    </div>
+    <h3>{{ d.marca }} {{ d.modelo }}</h3>
+    <p class="tenue">{{ d.codigo }} · {{ d.descripcion }}</p>
+    {% if d.requiere_autorizacion %}<span class="etiqueta etiqueta--aviso">Requiere autorización</span>
+    {% else %}<span class="etiqueta">Aprobación inmediata</span>{% endif %}
+    <div class="equipo__reservas">
+      <strong>Reservado:</strong>
+      {% if d.reservas %}
+        <ul>{% for r in d.reservas %}<li>{{ r.fecha_inicio|fecha }} – {{ r.fecha_fin|fecha }}{{ ' (pendiente)' if r.estado == 'pendiente' }}</li>{% endfor %}</ul>
+      {% else %}<span class="tenue">Sin reservas próximas</span>{% endif %}
+    </div>
+    <a class="btn btn--borde btn--sm" href="{{ url_for('nuevo_prestamo', dispositivo=d.id) }}">Reservar este equipo</a>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block titulo %}Nuevo préstamo{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>{{ 'Crear préstamo' if g.user.rol == 'administrador' else 'Solicitar préstamo' }}</h1>
+    <p class="tenue">Ningún dispositivo puede prestarse dos veces en las mismas fechas.</p>
+  </div>
+</div>
+
+<div class="dos-columnas">
+  <section class="tarjeta">
+    <form method="post" class="formulario" id="form-prestamo"
+          data-dias-max="{{ DIAS_MAX_PRESTAMO[g.user.rol] }}"
+          data-api="{{ url_for('api_ocupacion', dispositivo_id=0) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+      {% if g.user.rol == 'administrador' %}
+      <label>Solicitante (estudiante o profesor)
+        <select name="usuario_id" id="usuario_id" required>
+          <option value="">Selecciona…</option>
+          {% for u in usuarios %}
+            <option value="{{ u.id }}" data-dias-max="{{ DIAS_MAX_PRESTAMO[u.rol] }}"
+              {{ 'selected' if form.usuario_id == u.id|string }}>
+              {{ u.apellidos }} {{ u.nombres }} · {{ u.rol|capitalize }} · {{ u.numero_documento }}
+            </option>
+          {% endfor %}
+        </select>
+        {% if not usuarios %}<small class="tenue">Aún no hay estudiantes ni profesores registrados.</small>{% endif %}
+      </label>
+      {% endif %}
+
+      <label>Dispositivo
+        <select name="dispositivo_id" id="dispositivo_id" required>
+          <option value="">Selecciona…</option>
+          {% for grupo in dispositivos|groupby('tipo') %}
+            <optgroup label="{{ grupo.grouper }}">
+            {% for d in grupo.list %}
+              {% set sel = (form.dispositivo_id == d.id|string) or (preseleccion == d.id) %}
+              <option value="{{ d.id }}" data-autorizacion="{{ d.requiere_autorizacion }}" {{ 'selected' if sel }}>
+                {{ d.codigo }} — {{ d.marca }} {{ d.modelo }}{{ ' (requiere autorización)' if d.requiere_autorizacion }}
+              </option>
+            {% endfor %}
+            </optgroup>
+          {% endfor %}
+        </select>
+      </label>
+
+      <div class="rejilla">
+        <label>Fecha de recogida
+          <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ form.fecha_inicio }}"
+                 min="{{ hoy }}" max="{{ max_fecha_inicio }}" required>
+        </label>
+        <label>Fecha límite de entrega
+          <input type="date" name="fecha_fin" id="fecha_fin" value="{{ form.fecha_fin }}" min="{{ hoy }}" required>
+          <small class="tenue" id="ayuda-fin">Máximo {{ DIAS_MAX_PRESTAMO[g.user.rol] }} días después de la recogida.</small>
+        </label>
+      </div>
+
+      <label>Motivo del préstamo
+        <textarea name="motivo" rows="3" required minlength="10" maxlength="500"
+                  placeholder="Ej.: Grabación del proyecto final de Producción Audiovisual">{{ form.motivo }}</textarea>
+      </label>
+
+      <p class="aviso" id="aviso-autorizacion" hidden>
+        Este dispositivo requiere autorización: la solicitud quedará <strong>pendiente</strong> hasta que el administrador la apruebe.
+      </p>
+      <p class="aviso aviso--error" id="aviso-cruce" hidden></p>
+
+      <button type="submit" class="btn btn--primario">
+        {{ 'Crear préstamo aprobado' if g.user.rol == 'administrador' else 'Enviar solicitud' }}
+      </button>
+    </form>
+  </section>
+
+  <aside class="tarjeta">
+    <h2>Fechas ocupadas</h2>
+    <p class="tenue" id="ocupacion-ayuda">Selecciona un dispositivo para ver sus reservas.</p>
+    <ul class="ocupacion" id="ocupacion"></ul>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block contenido %}
+<section class="acceso">
+  <div class="tarjeta acceso__tarjeta">
+    <h1>Iniciar sesión</h1>
+    <p class="tenue">Solicita computadores, cámaras y tablets para tus actividades académicas.</p>
+    <form method="post" class="formulario">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label>Correo institucional o usuario
+        <input type="text" name="identificador" value="{{ identificador }}" required autofocus autocomplete="username">
+      </label>
+      <label>Contraseña
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button class="btn btn--primario btn--bloque" type="submit">Ingresar</button>
+    </form>
+    <p class="acceso__pie">¿No tienes cuenta? <a href="{{ url_for('registro') }}">Regístrate</a></p>
+  </div>
+</section>
+{% endblock %}

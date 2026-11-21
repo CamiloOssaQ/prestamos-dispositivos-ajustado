@@ -1,0 +1,17 @@
+{% macro estado(p) -%}
+  <span class="estado estado--{{ p.estado_visible|replace(' ', '-') }}">{{ p.estado_visible|capitalize }}</span>
+{%- endmacro %}
+
+{% macro dispositivo(p) -%}
+  <strong>{{ p.codigo }}</strong> · {{ p.tipo }}<br>
+  <small class="tenue">{{ p.marca }} {{ p.modelo }}</small>
+{%- endmacro %}
+
+{% macro boton_post(url, texto, clase='btn--sm', confirmar=None, observacion=False) -%}
+  <form method="post" action="{{ url }}" class="form-linea"
+        {% if confirmar %}onsubmit="return confirm('{{ confirmar }}')"{% endif %}>
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% if observacion %}<input type="text" name="observacion" placeholder="Observación (opcional)" class="input-sm">{% endif %}
+    <button type="submit" class="btn {{ clase }}">{{ texto }}</button>
+  </form>
+{%- endmacro %}

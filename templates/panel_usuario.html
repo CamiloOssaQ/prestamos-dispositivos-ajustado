@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import estado, dispositivo %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Hola, {{ g.user.nombres }}</h1>
+    <p class="tenue">Puedes tener hasta {{ max_activos }} préstamos activos o pendientes. Como {{ g.user.rol }}, cada préstamo dura máximo {{ DIAS_MAX_PRESTAMO[g.user.rol] }} días.</p>
+  </div>
+  <a class="btn btn--primario" href="{{ url_for('nuevo_prestamo') }}">+ Solicitar préstamo</a>
+</div>
+
+<section class="tarjeta">
+  <h2>Préstamos activos y pendientes</h2>
+  {% if prestamos %}
+  <div class="tabla-scroll">
+    <table class="tabla">
+      <thead><tr><th>#</th><th>Dispositivo</th><th>Recogida</th><th>Entrega límite</th><th>Estado</th></tr></thead>
+      <tbody>
+      {% for p in prestamos %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ dispositivo(p) }}</td>
+          <td>{{ p.fecha_inicio|fecha }}</td>
+          <td><strong>{{ p.fecha_fin|fecha }}</strong><br><small class="tenue">antes de las {{ HORA_LIMITE_ENTREGA }}</small></td>
+          <td>{{ estado(p) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="vacio">No tienes préstamos activos. <a href="{{ url_for('nuevo_prestamo') }}">Solicita uno</a>.</p>
+  {% endif %}
+</section>
+
+<section class="tarjeta info">
+  <h2>¿Cómo funciona?</h2>
+  <ol>
+    <li>Elige el dispositivo y las fechas de recogida y entrega. El sistema no permite fechas que se crucen con otra reserva.</li>
+    <li>Los dispositivos marcados con <span class="etiqueta etiqueta--aviso">Requiere autorización</span> quedan <em>pendientes</em> hasta que el administrador los apruebe; los demás se aprueban de inmediato.</li>
+    <li>Recoge el dispositivo en la fecha de inicio y devuélvelo a más tardar en la fecha límite antes de las {{ HORA_LIMITE_ENTREGA }}</li>
+  </ol>
+</section>
+{% endblock %}

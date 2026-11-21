@@ -1,0 +1,10 @@
+# Base de datos local (se crea automáticamente al iniciar la app)
+database/*.db
+database/*.db-journal
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env

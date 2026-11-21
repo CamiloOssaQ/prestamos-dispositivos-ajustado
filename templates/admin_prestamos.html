@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "_macros.html" import estado, dispositivo, boton_post %}
+{% block titulo %}Todos los préstamos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Todos los préstamos</h1>
+  <a class="btn btn--primario" href="{{ url_for('nuevo_prestamo') }}">+ Crear préstamo</a>
+</div>
+
+<form class="filtros" method="get">
+  <select name="estado" onchange="this.form.submit()">
+    <option value="">Todos los estados</option>
+    {% for e in ['pendiente', 'aprobado', 'vencido', 'devuelto', 'rechazado', 'cancelado'] %}
+      <option value="{{ e }}" {{ 'selected' if estado_filtro == e }}>{{ e|capitalize }}</option>
+    {% endfor %}
+  </select>
+  <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre, correo, documento o código del equipo">
+  <button class="btn btn--borde" type="submit">Buscar</button>
+  {% if estado_filtro or q %}<a href="{{ url_for('admin_prestamos') }}">Limpiar</a>{% endif %}
+</form>
+
+<section class="tarjeta">
+  <p class="tenue">{{ prestamos|length }} préstamo(s)</p>
+  {% if prestamos %}
+  <div class="tabla-scroll">
+    <table class="tabla">
+      <thead>
+        <tr><th>#</th><th>Solicitante</th><th>Dispositivo</th><th>Fechas</th><th>Motivo</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+      {% for p in prestamos %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>
+            <strong>{{ p.solicitante }}</strong><br>
+            <small class="tenue">{{ p.rol_solicitante|capitalize }} · Doc. {{ p.numero_documento }}<br>{{ p.correo }}</small>
+          </td>
+          <td>{{ dispositivo(p) }}</td>
+          <td>{{ p.fecha_inicio|fecha }}<br>→ {{ p.fecha_fin|fecha }}</td>
+          <td class="motivo">{{ p.motivo }}</td>
+          <td>{{ estado(p) }}{% if p.observacion %}<br><small class="tenue">{{ p.observacion }}</small>{% endif %}</td>
+          <td><small>
+            Creado por {{ p.creador }}{{ ' (admin)' if p.rol_creador == 'administrador' }}<br>
+            {{ p.creado_en }}
+            {% if p.revisor %}<br>Revisado por {{ p.revisor }}{% endif %}
+            {% if p.devuelto_en %}<br>Devuelto: {{ p.devuelto_en }}{% endif %}
+          </small></td>
+          <td class="acciones">
+            {% if p.estado == 'pendiente' %}
+              {% if p.fecha_fin >= hoy %}{{ boton_post(url_for('aprobar_prestamo', prestamo_id=p.id), 'Aprobar', 'btn--sm btn--exito') }}{% endif %}
+              {{ boton_post(url_for('rechazar_prestamo', prestamo_id=p.id), 'Rechazar', 'btn--sm btn--peligro', observacion=True) }}
+            {% elif p.estado == 'aprobado' %}
+              {% if p.fecha_inicio <= hoy %}
+                {{ boton_post(url_for('devolver_prestamo', prestamo_id=p.id), 'Registrar devolución', 'btn--sm btn--exito') }}
+              {% else %}
+                {{ boton_post(url_for('cancelar_prestamo', prestamo_id=p.id), 'Cancelar', 'btn--sm btn--borde', confirmar='¿Cancelar este préstamo?') }}
+              {% endif %}
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="vacio">No hay préstamos con esos filtros.</p>
+  {% endif %}
+</section>
+{% endblock %}

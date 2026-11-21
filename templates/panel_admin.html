@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import estado, dispositivo, boton_post %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Panel de administración</h1>
+    <p class="tenue">Revisa solicitudes, registra préstamos y controla las devoluciones.</p>
+  </div>
+  <a class="btn btn--primario" href="{{ url_for('nuevo_prestamo') }}">+ Crear préstamo</a>
+</div>
+
+<div class="indicadores">
+  <a class="indicador" href="{{ url_for('admin_prestamos', estado='pendiente') }}">
+    <span class="indicador__valor">{{ stats.pendientes or 0 }}</span><span>Pendientes de aprobación</span></a>
+  <a class="indicador" href="{{ url_for('admin_prestamos', estado='aprobado') }}">
+    <span class="indicador__valor">{{ stats.en_curso or 0 }}</span><span>En curso hoy</span></a>
+  <a class="indicador" href="{{ url_for('admin_prestamos', estado='aprobado') }}">
+    <span class="indicador__valor">{{ stats.proximos or 0 }}</span><span>Próximos aprobados</span></a>
+  <a class="indicador indicador--alerta" href="{{ url_for('admin_prestamos', estado='vencido') }}">
+    <span class="indicador__valor">{{ stats.vencidos or 0 }}</span><span>Vencidos sin devolver</span></a>
+</div>
+
+<section class="tarjeta">
+  <h2>Solicitudes pendientes</h2>
+  {% if pendientes %}
+  <div class="tabla-scroll">
+    <table class="tabla">
+      <thead><tr><th>#</th><th>Solicitante</th><th>Dispositivo</th><th>Fechas</th><th>Motivo</th><th>Acciones</th></tr></thead>
+      <tbody>
+      {% for p in pendientes %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ p.solicitante }}<br><small class="tenue">{{ p.rol_solicitante|capitalize }} · {{ p.correo }}</small></td>
+          <td>{{ dispositivo(p) }}</td>
+          <td>{{ p.fecha_inicio|fecha }} → {{ p.fecha_fin|fecha }}<br>{{ estado(p) }}</td>
+          <td class="motivo">{{ p.motivo }}</td>
+          <td class="acciones">
+            {{ boton_post(url_for('aprobar_prestamo', prestamo_id=p.id), 'Aprobar', 'btn--sm btn--exito') }}
+            {{ boton_post(url_for('rechazar_prestamo', prestamo_id=p.id), 'Rechazar', 'btn--sm btn--peligro', observacion=True) }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="vacio">No hay solicitudes pendientes.</p>
+  {% endif %}
+</section>
+{% endblock %}

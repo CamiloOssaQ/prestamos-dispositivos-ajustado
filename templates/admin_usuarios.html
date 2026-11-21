@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<div class="encabezado"><h1>Usuarios registrados</h1></div>
+<section class="tarjeta">
+  {% if usuarios %}
+  <div class="tabla-scroll">
+    <table class="tabla">
+      <thead><tr><th>Nombre</th><th>Rol</th><th>Documento</th><th>Código</th><th>Correo</th><th>Celular</th><th>Académico</th><th>Préstamos</th></tr></thead>
+      <tbody>
+      {% for u in usuarios %}
+        <tr>
+          <td><strong>{{ u.apellidos }} {{ u.nombres }}</strong><br><small class="tenue">Desde {{ u.creado_en[:10]|fecha }}</small></td>
+          <td>{{ u.rol|capitalize }}</td>
+          <td>{{ u.tipo_documento }} {{ u.numero_documento }}</td>
+          <td>{{ u.codigo_institucional }}</td>
+          <td>{{ u.correo }}</td>
+          <td>{{ u.telefono }}</td>
+          <td><small>
+            {% if u.rol == 'estudiante' %}{{ u.programa }} · Semestre {{ u.semestre }} · {{ u.modalidad }}
+            {% else %}{{ u.vinculacion }}{% endif %}<br><span class="tenue">{{ u.facultad }}</span>
+          </small></td>
+          <td>{{ u.total_prestamos }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="vacio">Todavía no hay estudiantes ni profesores registrados.</p>
+  {% endif %}
+</section>
+{% endblock %}

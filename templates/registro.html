@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta{% endblock %}
+{% block contenido %}
+<section class="tarjeta registro">
+  <h1>Crear cuenta</h1>
+  <p class="tenue">Tu correo institucional y tu contraseña serán tus credenciales para iniciar sesión.</p>
+
+  <form method="post" class="formulario" id="form-registro" novalidate>
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+    <fieldset>
+      <legend>Vinculación con la institución</legend>
+      <div class="opciones-rol">
+        <label class="opcion"><input type="radio" name="rol" value="estudiante" {{ 'checked' if form.rol != 'profesor' }}> Estudiante</label>
+        <label class="opcion"><input type="radio" name="rol" value="profesor" {{ 'checked' if form.rol == 'profesor' }}> Profesor</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Datos personales</legend>
+      <div class="rejilla">
+        <label>Tipo de documento
+          <select name="tipo_documento" required>
+            <option value="">Selecciona…</option>
+            {% for cod, nombre in tipos_documento.items() %}
+              <option value="{{ cod }}" {{ 'selected' if form.tipo_documento == cod }}>{{ nombre }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Número de documento
+          <input type="text" name="numero_documento" value="{{ form.numero_documento }}" required maxlength="15" inputmode="numeric">
+        </label>
+        <label>Nombres
+          <input type="text" name="nombres" value="{{ form.nombres }}" required maxlength="60">
+        </label>
+        <label>Apellidos
+          <input type="text" name="apellidos" value="{{ form.apellidos }}" required maxlength="60">
+        </label>
+        <label>Celular
+          <input type="tel" name="telefono" value="{{ form.telefono }}" required maxlength="10" placeholder="3001234567" inputmode="numeric">
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Información académica</legend>
+      <div class="rejilla">
+        <label><span data-rol-texto="estudiante">Código estudiantil</span><span data-rol-texto="profesor">Código docente</span>
+          <input type="text" name="codigo_institucional" value="{{ form.codigo_institucional }}" required maxlength="12" inputmode="numeric">
+        </label>
+        <label>Facultad
+          <select name="facultad" required>
+            <option value="">Selecciona…</option>
+            {% for f in facultades %}<option {{ 'selected' if form.facultad == f }}>{{ f }}</option>{% endfor %}
+          </select>
+        </label>
+        <label data-rol="estudiante">Programa académico
+          <select name="programa">
+            <option value="">Selecciona…</option>
+            {% for p in programas %}<option {{ 'selected' if form.programa == p }}>{{ p }}</option>{% endfor %}
+          </select>
+        </label>
+        <label data-rol="estudiante">Semestre
+          <select name="semestre">
+            <option value="">Selecciona…</option>
+            {% for s in range(1, 11) %}<option value="{{ s }}" {{ 'selected' if form.semestre == s|string }}>{{ s }}</option>{% endfor %}
+          </select>
+        </label>
+        <label data-rol="estudiante">Modalidad
+          <select name="modalidad">
+            <option value="">Selecciona…</option>
+            {% for m in modalidades %}<option {{ 'selected' if form.modalidad == m }}>{{ m }}</option>{% endfor %}
+          </select>
+        </label>
+        <label data-rol="profesor">Tipo de vinculación
+          <select name="vinculacion">
+            <option value="">Selecciona…</option>
+            {% for v in vinculaciones %}<option {{ 'selected' if form.vinculacion == v }}>{{ v }}</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Credenciales de acceso</legend>
+      <div class="rejilla">
+        <label>Correo institucional
+          <input type="email" name="correo" value="{{ form.correo }}" required placeholder="usuario@{{ dominio }}" autocomplete="email">
+        </label>
+        <label>Confirmar correo
+          <input type="email" name="correo_confirmacion" value="{{ form.correo_confirmacion }}" required autocomplete="off" data-igual-a="correo">
+          <small class="ayuda-error" hidden>Los correos no coinciden.</small>
+        </label>
+        <label>Contraseña
+          <input type="password" name="password" required minlength="8" autocomplete="new-password">
+          <small class="tenue">Mínimo 8 caracteres, con letras y números.</small>
+        </label>
+        <label>Confirmar contraseña
+          <input type="password" name="password_confirmacion" required autocomplete="new-password" data-igual-a="password">
+          <small class="ayuda-error" hidden>Las contraseñas no coinciden.</small>
+        </label>
+      </div>
+    </fieldset>
+
+    <label class="check">
+      <input type="checkbox" name="acepta_datos" value="1" {{ 'checked' if form.acepta_datos }}>
+      Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012 para la gestión de préstamos.
+    </label>
+
+    <button class="btn btn--primario" type="submit">Crear cuenta</button>
+    <p class="acceso__pie">¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+  </form>
+</section>
+{% endblock %}
